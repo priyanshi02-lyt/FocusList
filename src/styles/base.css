@@ -16,16 +16,16 @@ html, body {
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 24px 16px 80px;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px 16px calc(80px + env(safe-area-inset-bottom, 0px));
   overflow-x: hidden;
 }
 
 @media (max-width: 640px) {
   body {
-    padding: 12px 10px 60px;
+    padding: 14px 12px calc(60px + env(safe-area-inset-bottom, 0px));
   }
 }
 

@@ -756,3 +756,545 @@
   pointer-events: none;
   z-index: 99999;
 }
+
+/* ============================================================
+   7. TASK CREATION & EDIT DRAWER / MODAL (Screen 3 iOS Sheet)
+   ============================================================ */
+.modal-overlay-sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 20, 23, 0.48);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s ease;
+}
+
+.modal-overlay-sheet.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal-sheet-content {
+  background: #ffffff;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.96) translateY(12px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay-sheet.active .modal-sheet-content {
+  transform: scale(1) translateY(0);
+}
+
+.sheet-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sheet-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #121417;
+  letter-spacing: -0.02em;
+}
+
+.btn-sheet-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f4f5f7;
+  color: #121417;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-sheet-circle:hover {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+#sheet-header-submit-btn {
+  background: var(--accent-black);
+  color: #ffffff;
+  border: none;
+}
+
+#sheet-header-submit-btn:hover {
+  background: #2b2e35;
+}
+
+.sheet-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sheet-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.sheet-input-box {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  background: #f8f9fa;
+  font-family: inherit;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.sheet-input-box:focus {
+  border-color: #121417;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(18, 20, 23, 0.08);
+}
+
+.sheet-textarea {
+  height: 80px;
+  padding: 12px 16px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.date-time-row {
+  display: flex;
+  gap: 10px;
+}
+
+.sheet-pill-readout {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f4f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.priority-pill-selector-row {
+  display: flex;
+  gap: 8px;
+}
+
+.priority-select-pill {
+  flex: 1;
+  height: 38px;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.priority-select-pill.low {
+  background: var(--priority-low-bg);
+  border-color: var(--priority-low-border);
+  color: var(--priority-low-text);
+}
+
+.priority-select-pill.medium {
+  background: var(--priority-med-bg);
+  border-color: var(--priority-med-border);
+  color: var(--priority-med-text);
+}
+
+.priority-select-pill.high {
+  background: var(--priority-high-bg);
+  border-color: var(--priority-high-border);
+  color: var(--priority-high-text);
+}
+
+.priority-select-pill.selected {
+  box-shadow: 0 0 0 2px #121417;
+  font-weight: 700;
+}
+
+.tags-row-modal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag-badge-pill {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  color: var(--tag-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.tag-badge-pill.add-btn {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.btn-create-task-pill {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--accent-black);
+  color: #ffffff;
+  border: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-create-task-pill:hover {
+  background: #2b2e35;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   8. KEYBOARD SHORTCUTS MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 20, 23, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #121417;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f4f5f7;
+  color: #121417;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shortcuts-table td {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.88rem;
+  color: #374151;
+}
+
+.key-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1f2937;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+   9. MOBILE RESPONSIVENESS & TOUCH OPTIMIZATION (<= 640px)
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Master container */
+  .app-master-container {
+    gap: 16px;
+  }
+
+  /* Hero typography */
+  .hero-line-1 {
+    font-size: 1.35rem;
+  }
+
+  .hero-line-2 {
+    font-size: 1.7rem;
+  }
+
+  /* Progress Card */
+  .progress-dark-card {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .progress-card-body {
+    gap: 14px;
+  }
+
+  .progress-ring-container,
+  .progress-ring-svg {
+    width: 92px;
+    height: 92px;
+  }
+
+  .progress-ring-percent {
+    font-size: 1.2rem;
+  }
+
+  .stat-text-val {
+    font-size: 0.82rem;
+  }
+
+  /* Quick Add Card */
+  .quick-add-card {
+    padding: 16px;
+    border-radius: 20px;
+    gap: 10px;
+  }
+
+  .quick-add-input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .btn-add-submit {
+    width: 100%;
+    justify-content: center;
+    height: 42px;
+  }
+
+  .form-priority-selector {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .priority-btn-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .priority-choice-btn {
+    flex: 1;
+    text-align: center;
+    padding: 7px 0;
+    font-size: 0.78rem;
+  }
+
+  /* Filter & Search Toolbar */
+  .filter-toolbar-box {
+    padding: 16px;
+    border-radius: 20px;
+    gap: 12px;
+  }
+
+  .toolbar-header-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toolbar-title {
+    font-size: 1.15rem;
+  }
+
+  .toolbar-extra-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn-utility {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 6px 10px;
+    font-size: 0.76rem;
+  }
+
+  .filter-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .status-tabs-wrap {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .filter-tab-btn {
+    justify-content: center;
+    padding: 0 6px;
+    font-size: 0.8rem;
+    height: 36px;
+  }
+
+  .priority-filter-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .priority-dropdown-select {
+    flex: 1;
+    height: 36px;
+    font-size: 0.84rem;
+  }
+
+  /* Task Card */
+  .task-card-ios {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .task-card-title {
+    font-size: 0.98rem;
+  }
+
+  .btn-card-action {
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    min-height: 32px;
+  }
+
+  .task-checkbox {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Toast Notification on Mobile */
+  .toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: center;
+  }
+
+  .toast {
+    width: 100%;
+    max-width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Bottom-Sheet behavior for Task Modal on Mobile */
+  .modal-overlay-sheet {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-sheet-content {
+    max-width: 100%;
+    border-radius: 28px 28px 0 0;
+    padding: 20px 18px calc(24px + env(safe-area-inset-bottom, 12px));
+    transform: translateY(100%);
+    max-height: 85vh;
+  }
+
+  .modal-overlay-sheet.active .modal-sheet-content {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 360px) {
+  .progress-card-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .progress-stats-column {
+    width: 100%;
+  }
+
+  .stat-item-row {
+    justify-content: center;
+  }
+}
+

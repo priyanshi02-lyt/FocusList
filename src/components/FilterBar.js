@@ -45,7 +45,7 @@ export function renderFilterBar(container) {
           id="search-input" 
           data-testid="search-input" 
           class="ios-search-input" 
-          placeholder="Search tasks by title... (Press '/' to focus)" 
+          placeholder="Search tasks by title..." 
           value="${escapeHtml(store.searchQuery)}"
           autocomplete="off"
         />
@@ -91,8 +91,8 @@ export function renderFilterBar(container) {
           </button>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label for="priority-filter" style="font-size: 0.82rem; font-weight: 600; color: #4b5563;">Priority:</label>
+        <div class="priority-filter-wrap">
+          <label for="priority-filter" class="priority-filter-label">Priority:</label>
           <select id="priority-filter" data-testid="priority-filter" class="priority-dropdown-select" aria-label="Filter tasks by priority">
             <option value="all" ${store.priorityFilter === 'all' ? 'selected' : ''}>All Priorities</option>
             <option value="high" ${store.priorityFilter === 'high' ? 'selected' : ''}>High</option>
