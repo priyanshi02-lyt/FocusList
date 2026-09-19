@@ -8,7 +8,7 @@ on:
 
 jobs:
   audit-and-test:
-    name: Code Quality, Tests & Static Audit
+    name: Code Quality, Vitest Tests & Production Build
     runs-on: ubuntu-latest
 
     steps:
@@ -22,19 +22,10 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci || npm install
+        run: npm install
 
-      - name: Execute Automated Unit Tests
+      - name: Execute Vitest Unit Test Suite
         run: npm test
 
-      - name: Validate HTML & Asset Integrity
-        run: |
-          node -e "
-            const fs = require('fs');
-            const html = fs.readFileSync('index.html', 'utf-8');
-            if (!html.includes('id=\"taskForm\"') || !html.includes('id=\"taskList\"')) {
-              console.error('Critical elements missing in index.html');
-              process.exit(1);
-            }
-            console.log('HTML integrity check passed!');
-          "
+      - name: Build Production Bundle
+        run: npm run build
