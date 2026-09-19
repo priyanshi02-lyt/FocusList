@@ -1,20 +1,20 @@
 /**
- * FocusList — Modern SaaS & Orbix Studio Task Engine
- * Pure Vanilla JavaScript (Zero External Dependencies, Maximum Performance)
+ * FocusList — Orbix Studio & Modern Dashboard Mobile-First Task Engine
+ * Pure Vanilla JavaScript (Zero External Dependencies, High Performance)
  */
 
 (() => {
   'use strict';
 
   // --- Storage Keys ---
-  const STORAGE_KEY = 'focuslist_tasks_clean_v1';
-  const THEME_KEY = 'focuslist_theme_mode_v1';
-  const SOUND_KEY = 'focuslist_sound_mode_v1';
+  const STORAGE_KEY = 'focuslist_tasks_orbix_v1';
+  const THEME_KEY = 'focuslist_theme_v2';
+  const SOUND_KEY = 'focuslist_sound_v1';
 
   // --- Initial Starter / Demo Tasks ---
   const INITIAL_TASKS = [
     {
-      id: 'task_demo_1',
+      id: 'task_orbix_1',
       title: 'Create mood boards and visual references for mobile apps',
       completed: false,
       priority: 'High',
@@ -23,7 +23,7 @@
       createdAt: Date.now() - 3600000 * 2
     },
     {
-      id: 'task_demo_2',
+      id: 'task_orbix_2',
       title: 'Review responsive mobile and desktop dashboard layout',
       completed: false,
       priority: 'Medium',
@@ -32,8 +32,8 @@
       createdAt: Date.now() - 3600000 * 4
     },
     {
-      id: 'task_demo_3',
-      title: 'Test LocalStorage offline persistence across browser sessions',
+      id: 'task_orbix_3',
+      title: 'Test LocalStorage data persistence across browser reloads',
       completed: true,
       priority: 'Medium',
       category: 'Urgent',
@@ -41,8 +41,8 @@
       createdAt: Date.now() - 3600000 * 6
     },
     {
-      id: 'task_demo_4',
-      title: 'Daily gym session & hydration interval (Week 3)',
+      id: 'task_orbix_4',
+      title: 'Daily gym session & scheduled hydration interval',
       completed: false,
       priority: 'Low',
       category: 'Personal',
@@ -72,9 +72,9 @@
     clearSearchBtn: document.getElementById('clearSearchBtn'),
     openNewTaskBtn: document.getElementById('openNewTaskBtn'),
     mobileFloatingAddBtn: document.getElementById('mobileFloatingAddBtn'),
+    taskAddCard: document.getElementById('taskAddCard'),
     taskForm: document.getElementById('taskForm'),
     taskTitleInput: document.getElementById('taskTitleInput'),
-    charCounter: document.getElementById('charCounter'),
     taskCategorySelect: document.getElementById('taskCategorySelect'),
     taskDueDateInput: document.getElementById('taskDueDateInput'),
     statTotal: document.getElementById('statTotal'),
@@ -103,6 +103,7 @@
     priorityFilterSelect: document.getElementById('priorityFilterSelect'),
     sortBySelect: document.getElementById('sortBySelect'),
     clearCompletedBtn: document.getElementById('clearCompletedBtn'),
+    mobileClearCompletedBtn: document.getElementById('mobileClearCompletedBtn'),
     taskList: document.getElementById('taskList'),
     emptyState: document.getElementById('emptyState'),
     emptyTitle: document.getElementById('emptyTitle'),
@@ -122,9 +123,9 @@
     importJsonInput: document.getElementById('importJsonInput'),
     confettiCanvas: document.getElementById('confettiCanvas'),
     sidebarNavItems: document.querySelectorAll('.desktop-sidebar .nav-item'),
-    statusPills: document.querySelectorAll('.status-pill'),
-    kpiChips: document.querySelectorAll('.kpi-chip'),
-    mobileNavTabs: document.querySelectorAll('.mobile-nav-tab')
+    statusBtns: document.querySelectorAll('.status-btn'),
+    orbixChips: document.querySelectorAll('.orbix-chip'),
+    barTabs: document.querySelectorAll('.bar-tab')
   };
 
   // --- Initialization ---
@@ -161,7 +162,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
-      console.error('Failed to save tasks:', e);
+      console.error('Failed to persist tasks:', e);
       showToast('⚠️ Storage quota exceeded.', 'error');
     }
   }
@@ -180,7 +181,7 @@
     playAudio('click');
   }
 
-  // --- Sound Effects (Web Audio API) ---
+  // --- Web Audio API Feedback ---
   function initSound() {
     updateSoundUI();
   }
@@ -273,24 +274,19 @@
     elements.themeToggleBtn.addEventListener('click', toggleTheme);
     elements.soundToggleBtn.addEventListener('click', toggleSound);
 
-    // Desktop New Task button & Mobile floating + button focus input
+    // Desktop New Task button & Mobile floating + button focus
     const focusTaskInput = () => {
-      elements.taskTitleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      elements.taskAddCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       elements.taskTitleInput.focus();
       playAudio('click');
     };
     if (elements.openNewTaskBtn) elements.openNewTaskBtn.addEventListener('click', focusTaskInput);
     if (elements.mobileFloatingAddBtn) elements.mobileFloatingAddBtn.addEventListener('click', focusTaskInput);
 
-    // Char counter
-    elements.taskTitleInput.addEventListener('input', (e) => {
-      elements.charCounter.textContent = `${e.target.value.length}/140`;
-    });
-
-    // Form Priority radio styling
-    document.querySelectorAll('.add-task-form .prio-btn').forEach(btn => {
+    // Priority Radio active state styling
+    document.querySelectorAll('.clean-add-form .prio-option').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.add-task-form .prio-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.clean-add-form .prio-option').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         playAudio('click');
       });
@@ -342,10 +338,10 @@
       });
     });
 
-    // Status Pills (All, Active, Completed)
-    elements.statusPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        currentStatusFilter = pill.getAttribute('data-filter');
+    // Status Buttons (All, Active, Done)
+    elements.statusBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentStatusFilter = btn.getAttribute('data-filter');
         currentPriorityFilter = 'all';
         currentCategoryFilter = 'all';
         elements.priorityFilterSelect.value = 'all';
@@ -355,8 +351,8 @@
       });
     });
 
-    // KPI Chips
-    elements.kpiChips.forEach(chip => {
+    // Orbix Chips
+    elements.orbixChips.forEach(chip => {
       chip.addEventListener('click', () => {
         const filter = chip.getAttribute('data-filter');
         const prio = chip.getAttribute('data-priority');
@@ -374,8 +370,8 @@
       });
     });
 
-    // Mobile Bottom Nav Dock
-    elements.mobileNavTabs.forEach(tab => {
+    // Mobile Bottom Bar Tabs
+    elements.barTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const filter = tab.getAttribute('data-filter');
         const prio = tab.getAttribute('data-priority');
@@ -407,7 +403,8 @@
     });
 
     // Clear Completed Tasks
-    elements.clearCompletedBtn.addEventListener('click', handleClearCompleted);
+    if (elements.clearCompletedBtn) elements.clearCompletedBtn.addEventListener('click', handleClearCompleted);
+    if (elements.mobileClearCompletedBtn) elements.mobileClearCompletedBtn.addEventListener('click', handleClearCompleted);
 
     // Load Sample Tasks
     elements.loadSampleTasksBtn.addEventListener('click', () => {
@@ -427,9 +424,9 @@
     elements.editTaskForm.addEventListener('submit', handleSaveEditTask);
 
     // Modal Priority Radio Styling Sync
-    document.querySelectorAll('#editTaskForm .prio-btn').forEach(btn => {
+    document.querySelectorAll('#editTaskForm .prio-option').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('#editTaskForm .prio-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#editTaskForm .prio-option').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         playAudio('click');
       });
@@ -451,15 +448,13 @@
     });
   }
 
-  // --- Sync Active States Across Sidebar, Pills, and Mobile Dock ---
+  // --- Sync Navigation State ---
   function syncNavigationUI() {
-    // Status Pills
-    elements.statusPills.forEach(pill => {
-      const f = pill.getAttribute('data-filter');
-      pill.classList.toggle('active', f === currentStatusFilter && currentPriorityFilter === 'all' && currentCategoryFilter === 'all');
+    elements.statusBtns.forEach(btn => {
+      const f = btn.getAttribute('data-filter');
+      btn.classList.toggle('active', f === currentStatusFilter && currentPriorityFilter === 'all' && currentCategoryFilter === 'all');
     });
 
-    // Sidebar items
     elements.sidebarNavItems.forEach(item => {
       const filter = item.getAttribute('data-filter');
       const prio = item.getAttribute('data-priority');
@@ -473,8 +468,7 @@
       item.classList.toggle('active', isActive);
     });
 
-    // KPI Chips
-    elements.kpiChips.forEach(chip => {
+    elements.orbixChips.forEach(chip => {
       const f = chip.getAttribute('data-filter');
       const p = chip.getAttribute('data-priority');
       let isActive = false;
@@ -483,8 +477,7 @@
       chip.classList.toggle('active', isActive);
     });
 
-    // Mobile Bottom Dock
-    elements.mobileNavTabs.forEach(tab => {
+    elements.barTabs.forEach(tab => {
       const f = tab.getAttribute('data-filter');
       const p = tab.getAttribute('data-priority');
       let isActive = false;
@@ -523,9 +516,8 @@
 
     // Reset Form
     elements.taskForm.reset();
-    elements.charCounter.textContent = '0/140';
-    document.querySelectorAll('.add-task-form .prio-btn').forEach(b => b.classList.remove('active'));
-    const defaultMedBtn = document.querySelector('.add-task-form .prio-btn.medium');
+    document.querySelectorAll('.clean-add-form .prio-option').forEach(b => b.classList.remove('active'));
+    const defaultMedBtn = document.querySelector('.clean-add-form .prio-option.medium');
     if (defaultMedBtn) {
       defaultMedBtn.classList.add('active');
       const radio = defaultMedBtn.querySelector('input');
@@ -547,7 +539,7 @@
 
     if (task.completed) {
       playAudio('complete');
-      showToast('Task marked as done! 🎉', 'success');
+      showToast('Task completed! Great job! 🎉', 'success');
       const remainingPending = tasks.filter(t => !t.completed).length;
       if (remainingPending === 0 && tasks.length > 0) {
         triggerConfettiCelebration();
@@ -610,7 +602,7 @@
     elements.editTaskCategory.value = task.category || 'Work';
     elements.editTaskDueDate.value = task.dueDate || '';
 
-    document.querySelectorAll('#editTaskForm .prio-btn').forEach(btn => {
+    document.querySelectorAll('#editTaskForm .prio-option').forEach(btn => {
       const radio = btn.querySelector('input');
       if (radio.value === task.priority) {
         radio.checked = true;
@@ -708,7 +700,7 @@
     return result;
   }
 
-  // --- Statistics & Donut KPI Chart Calculation ---
+  // --- Statistics & Donut Chart (Exact Image 1 Replica) ---
   function updateStatistics() {
     const total = tasks.length;
     const completed = tasks.filter(t => t.completed).length;
@@ -716,19 +708,19 @@
     const highUrgency = tasks.filter(t => !t.completed && t.priority === 'High').length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Stat Cards
+    // Numerical values
     elements.statTotal.textContent = total;
     elements.statCompleted.textContent = completed;
     elements.statPending.textContent = pending;
     elements.statHigh.textContent = highUrgency;
     elements.statPercentage.textContent = `${percentage}%`;
 
-    // Linear progress fill
+    // Linear bar fill
     elements.progressBarFill.style.width = `${percentage}%`;
 
     // Donut SVG Segments
-    // r = 52 -> Circumference = 2 * PI * 52 ≈ 326.72
-    const C = 2 * Math.PI * 52;
+    // r = 45 -> Circumference = 2 * PI * 45 ≈ 282.74
+    const C = 2 * Math.PI * 45;
     const doneLen = total > 0 ? (completed / total) * C : 0;
     const progLen = total > 0 ? ((pending - highUrgency) / total) * C : 0;
     const highLen = total > 0 ? (highUrgency / total) * C : 0;
@@ -747,7 +739,7 @@
     }
 
     // Motivational Quote
-    let quote = 'Start your day with steady momentum!';
+    let quote = 'Start your daily focus with clarity.';
     if (total === 0) {
       quote = 'Task pipeline is clear. Add your first goal above!';
     } else if (percentage === 100) {
@@ -761,30 +753,31 @@
     }
     elements.motivationQuote.textContent = quote;
 
-    // Counter Badges
+    // Status Tab Counters
     elements.countAll.textContent = total;
     elements.countActive.textContent = pending;
     elements.countCompleted.textContent = completed;
 
     // Sidebar Counters
-    elements.sideCountAll.textContent = total;
-    elements.sideCountActive.textContent = pending;
-    elements.sideCountCompleted.textContent = completed;
-    elements.sideCountHigh.textContent = tasks.filter(t => t.priority === 'High').length;
-    elements.sideCountMedium.textContent = tasks.filter(t => t.priority === 'Medium').length;
-    elements.sideCountLow.textContent = tasks.filter(t => t.priority === 'Low').length;
+    if (elements.sideCountAll) elements.sideCountAll.textContent = total;
+    if (elements.sideCountActive) elements.sideCountActive.textContent = pending;
+    if (elements.sideCountCompleted) elements.sideCountCompleted.textContent = completed;
+    if (elements.sideCountHigh) elements.sideCountHigh.textContent = tasks.filter(t => t.priority === 'High').length;
+    if (elements.sideCountMedium) elements.sideCountMedium.textContent = tasks.filter(t => t.priority === 'Medium').length;
+    if (elements.sideCountLow) elements.sideCountLow.textContent = tasks.filter(t => t.priority === 'Low').length;
 
-    // KPI Chips
+    // Top Chips
     elements.chipAllCount.textContent = `${total} task${total === 1 ? '' : 's'}`;
-    elements.chipActiveCount.textContent = `${pending} in progress`;
+    elements.chipActiveCount.textContent = `${pending} pending`;
     elements.chipHighCount.textContent = `${tasks.filter(t => t.priority === 'High').length} critical`;
-    elements.chipCompletedCount.textContent = `${completed} finished`;
+    elements.chipCompletedCount.textContent = `${completed} done`;
 
     // Clear completed button state
-    elements.clearCompletedBtn.disabled = completed === 0;
+    if (elements.clearCompletedBtn) elements.clearCompletedBtn.disabled = completed === 0;
+    if (elements.mobileClearCompletedBtn) elements.mobileClearCompletedBtn.style.display = completed > 0 ? 'inline-block' : 'none';
   }
 
-  // --- Render Task Cards ---
+  // --- Render Task Cards (Matching Image 1 Style) ---
   function render() {
     updateStatistics();
     syncNavigationUI();
@@ -814,7 +807,7 @@
 
       filteredTasks.forEach(task => {
         const itemEl = document.createElement('li');
-        itemEl.className = `task-card-item ${task.completed ? 'is-completed' : ''}`;
+        itemEl.className = `orbix-task-card ${task.completed ? 'is-completed' : ''}`;
         itemEl.setAttribute('data-priority', task.priority);
         itemEl.setAttribute('data-id', task.id);
 
@@ -822,7 +815,7 @@
         if (task.dueDate) {
           const isOverdue = !task.completed && new Date(task.dueDate + 'T23:59:59') < new Date();
           dueHtml = `
-            <span class="due-pill ${isOverdue ? 'overdue' : ''}" title="Due date">
+            <span class="date-chip-badge ${isOverdue ? 'overdue' : ''}" title="Target date">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
@@ -835,52 +828,64 @@
         const displayTitle = highlightMatch(escapeHtml(task.title), searchQuery);
 
         itemEl.innerHTML = `
-          <div class="card-left-group">
-            <label class="clean-check-wrap" title="${task.completed ? 'Mark pending' : 'Mark complete'}">
-              <input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="Mark task complete" />
-              <div class="custom-box">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-            </label>
+          <div class="card-top-row">
+            <div class="card-title-group">
+              <h4 class="card-main-title">${displayTitle}</h4>
+            </div>
 
-            <div class="card-text-details">
-              <span class="card-title-text">${displayTitle}</span>
-              <div class="card-meta-badges">
-                <span class="prio-badge-pill badge-prio-${task.priority.toLowerCase()}">
-                  <span class="prio-circle ${task.priority === 'High' ? 'red' : task.priority === 'Medium' ? 'yellow' : 'green'}"></span>
-                  <span>${task.priority}</span>
-                </span>
-                ${task.category ? `<span class="cat-pill">${escapeHtml(task.category)}</span>` : ''}
-                ${dueHtml}
-              </div>
+            <div class="card-actions-row">
+              <button class="icon-button-action edit-btn" title="Edit task" aria-label="Edit task">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="icon-button-action delete-btn" title="Delete task" aria-label="Delete task">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>
           </div>
 
-          <div class="card-actions-group">
-            <button class="card-action-btn edit-action" title="Edit task" aria-label="Edit task">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          <div class="card-meta-chips">
+            <span class="prio-chip-badge ${task.priority.toLowerCase()}">
+              <span class="pip ${task.priority === 'High' ? 'red' : task.priority === 'Medium' ? 'yellow' : 'green'}"></span>
+              <span>${task.priority} Priority</span>
+            </span>
+            ${task.category ? `<span class="tag-chip-badge">${escapeHtml(task.category)}</span>` : ''}
+            ${dueHtml}
+          </div>
+
+          <div class="card-bottom-bar">
+            <div class="progress-info-group">
+              <div class="progress-label-row">
+                <span>${task.completed ? 'Completed' : 'On Progress'}</span>
+                <span>${task.completed ? '100%' : (task.priority === 'High' ? '75%' : task.priority === 'Medium' ? '50%' : '25%')}</span>
+              </div>
+              <div class="card-mini-track">
+                <div class="card-mini-fill" style="width: ${task.completed ? '100%' : (task.priority === 'High' ? '75%' : task.priority === 'Medium' ? '50%' : '25%')};"></div>
+              </div>
+            </div>
+
+            <button class="complete-toggle-btn ${task.completed ? 'is-done' : ''}" title="${task.completed ? 'Mark as active' : 'Mark as done'}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-            </button>
-            <button class="card-action-btn delete-action" title="Delete task" aria-label="Delete task">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+              <span>${task.completed ? 'Done' : 'Complete'}</span>
             </button>
           </div>
         `;
 
-        const checkbox = itemEl.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener('change', () => handleToggleTask(task.id));
+        // Action Events
+        const toggleBtn = itemEl.querySelector('.complete-toggle-btn');
+        toggleBtn.addEventListener('click', () => handleToggleTask(task.id));
 
-        const editBtn = itemEl.querySelector('.edit-action');
+        const editBtn = itemEl.querySelector('.edit-btn');
         editBtn.addEventListener('click', () => openEditModal(task.id));
 
-        const deleteBtn = itemEl.querySelector('.delete-action');
+        const deleteBtn = itemEl.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', () => handleDeleteTask(task.id));
 
         elements.taskList.appendChild(itemEl);
@@ -912,7 +917,7 @@
   function highlightMatch(text, query) {
     if (!query) return text;
     const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-    return text.replace(regex, '<mark class="highlight-match">$1</mark>');
+    return text.replace(regex, '<mark class="search-match-highlight">$1</mark>');
   }
 
   function escapeRegex(string) {
@@ -943,8 +948,8 @@
 
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(15px)';
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transform = 'translateY(12px)';
+      setTimeout(() => toast.remove(), 250);
     }, 3200);
   }
 
@@ -968,8 +973,8 @@
 
     undoTimeout = setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(15px)';
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transform = 'translateY(12px)';
+      setTimeout(() => toast.remove(), 250);
       lastDeletedTask = null;
     }, 5000);
   }
@@ -981,7 +986,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `focuslist-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `focuslist-orbix-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1024,17 +1029,17 @@
     canvas.height = window.innerHeight;
 
     const pieces = [];
-    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
+    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#f43f5e', '#a855f7'];
 
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 85; i++) {
       pieces.push({
         x: canvas.width / 2,
         y: canvas.height * 0.45,
-        w: Math.random() * 8 + 6,
-        h: Math.random() * 8 + 6,
+        w: Math.random() * 8 + 5,
+        h: Math.random() * 8 + 5,
         color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 18,
-        vy: (Math.random() - 0.7) * 20,
+        vx: (Math.random() - 0.5) * 16,
+        vy: (Math.random() - 0.7) * 18,
         rot: Math.random() * 360,
         rotSpeed: (Math.random() - 0.5) * 10,
         opacity: 1
@@ -1052,7 +1057,7 @@
         p.y += p.vy;
         p.vy += 0.35;
         p.rot += p.rotSpeed;
-        p.opacity -= 0.012;
+        p.opacity -= 0.013;
 
         if (p.opacity > 0) {
           alive = true;
@@ -1066,7 +1071,7 @@
         }
       });
 
-      if (alive && frame < 130) {
+      if (alive && frame < 120) {
         requestAnimationFrame(loop);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
