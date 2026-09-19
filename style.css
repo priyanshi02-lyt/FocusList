@@ -77,7 +77,7 @@
 }
 
 /* ==========================================================================
-   Reset & Base Foundations
+   Reset & Base Foundations & Accessibility Utilities
    ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -85,6 +85,46 @@
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Screen Reader Accessible Utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Accessibility Skip Link */
+.skip-link {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100000;
+  background: var(--accent-purple);
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-250%);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.skip-link:focus, .skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Accessible Focus Outlines */
+:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
 }
 
 html, body {
@@ -896,6 +936,124 @@ html, body {
 }
 
 /* ==========================================================================
+   Quick-Add Task Bar (Inline on Dashboard)
+   ========================================================================== */
+.quick-add-container {
+  width: 100%;
+  margin-bottom: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 0.95rem 1.15rem;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-add-container:focus-within {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 3px var(--accent-purple-light);
+}
+
+.quick-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.quick-add-main-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quick-add-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.quick-add-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--text-title);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.quick-add-input:focus {
+  border-color: var(--accent-purple);
+}
+
+.quick-add-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--accent-purple-grad);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px var(--accent-purple-glow);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  min-height: 44px;
+}
+
+.quick-add-submit-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.quick-add-submit-btn:active {
+  transform: scale(0.98);
+}
+
+.quick-add-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.2rem;
+}
+
+.quick-option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.quick-option-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.quick-mini-select, .quick-mini-date {
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  color: var(--text-body);
+  outline: none;
+  cursor: pointer;
+  min-height: 34px;
+}
+
+.quick-mini-select:focus, .quick-mini-date:focus {
+  border-color: var(--accent-purple);
+}
+
+/* ==========================================================================
    Status Tabs & Toolbar
    ========================================================================== */
 .status-toolbar-row {
@@ -1109,7 +1267,28 @@ html, body {
   border-radius: 8px;
 }
 
-/* Circular Checkbox (Matching Image 1 & 2) */
+/* Circular Accessible Checkbox Wrapper */
+.custom-checkbox-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.task-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
 .circular-check-btn {
   width: 28px;
   height: 28px;
@@ -1120,7 +1299,7 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
@@ -1128,10 +1307,17 @@ html, body {
   border-color: var(--accent-emerald);
 }
 
+.task-checkbox:checked ~ .circular-check-btn,
 .task-card-item.completed .circular-check-btn {
   background: var(--accent-emerald);
   border-color: var(--accent-emerald);
   color: #ffffff;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.task-checkbox:focus-visible ~ .circular-check-btn {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
 }
 
 .task-main-title {
@@ -2032,3 +2218,31 @@ html, body {
     transform: translateY(0);
   }
 }
+
+/* ==========================================================================
+   Accessibility: Reduced Motion & Forced High Contrast
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+  .custom-check-box, .circular-check-btn {
+    border: 2px solid CanvasText !important;
+  }
+  .task-checkbox:checked ~ .circular-check-btn,
+  .task-card-item.completed .circular-check-btn {
+    background: Highlight !important;
+    border-color: Highlight !important;
+    color: HighlightText !important;
+  }
+}
+

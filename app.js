@@ -95,6 +95,14 @@
     priorityFilterSelect: document.getElementById('priorityFilterSelect'),
     calendarWeekRibbon: document.getElementById('calendarWeekRibbon'),
     
+    // Quick Add Bar Elements
+    taskForm: document.getElementById('taskForm'),
+    taskTitleInput: document.getElementById('taskTitleInput'),
+    taskPrioritySelect: document.getElementById('taskPrioritySelect'),
+    taskCategorySelect: document.getElementById('taskCategorySelect'),
+    taskDueDateInput: document.getElementById('taskDueDateInput'),
+    addTaskBtn: document.getElementById('addTaskBtn'),
+
     // Desktop New Task & Mobile FAB
     openNewTaskBtn: document.getElementById('openNewTaskBtn'),
     mobileFloatingAddBtn: document.getElementById('mobileFloatingAddBtn'),
@@ -106,10 +114,13 @@
     viewSettings: document.getElementById('viewSettings'),
     barTabs: document.querySelectorAll('.bar-tab'),
 
-    // Tasks View Elements
+    // Tasks View Elements & Test ID Aliases
     statTotal: document.getElementById('statTotal'),
+    totalTasks: document.getElementById('totalTasks'),
     statPending: document.getElementById('statPending'),
+    pendingTasks: document.getElementById('pendingTasks'),
     statCompleted: document.getElementById('statCompleted'),
+    completedTasks: document.getElementById('completedTasks'),
     statHigh: document.getElementById('statHigh'),
     statPercentage: document.getElementById('statPercentage'),
     progressBarFill: document.getElementById('progressBarFill'),
@@ -185,16 +196,36 @@
     editTaskCategory: document.getElementById('editTaskCategory'),
     editTaskDueDate: document.getElementById('editTaskDueDate'),
 
-    // Toast & Canvas
+    // Toast, Canvas & Live Region
     toastContainer: document.getElementById('toastContainer'),
-    confettiCanvas: document.getElementById('confettiCanvas')
+    confettiCanvas: document.getElementById('confettiCanvas'),
+    liveRegion: document.getElementById('liveRegion')
   };
+
+  // --- Screen Reader Announcements ---
+  function announceLive(message) {
+    if (elements.liveRegion) {
+      elements.liveRegion.textContent = message;
+    }
+  }
+
+  // --- Offline PWA Service Worker Registration ---
+  function initServiceWorker() {
+    if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch((err) => {
+          console.warn('Service worker registration note:', err);
+        });
+      });
+    }
+  }
 
   // --- Initialization ---
   function init() {
     initTheme();
     initSound();
     initDateDisplay();
+    initServiceWorker();
     renderCalendarWeekRibbon();
     bindEvents();
     render();
@@ -467,8 +498,15 @@
       });
     });
 
-    // Create Task Submit
-    elements.createTaskForm.addEventListener('submit', handleCreateTaskSubmit);
+    // Quick Add Bar Task Submit
+    if (elements.taskForm) {
+      elements.taskForm.addEventListener('submit', handleQuickAddTaskSubmit);
+    }
+
+    // Create Task Modal Submit
+    if (elements.createTaskForm) {
+      elements.createTaskForm.addEventListener('submit', handleCreateTaskSubmit);
+    }
 
     // Search Input
     elements.searchInput.addEventListener('input', (e) => {
@@ -627,7 +665,41 @@
     render();
   }
 
-  // --- Create Task Action ---
+  // --- Quick-Add Task Action (Inline on Dashboard) ---
+  function handleQuickAddTaskSubmit(e) {
+    e.preventDefault();
+    const title = elements.taskTitleInput ? elements.taskTitleInput.value.trim() : '';
+    if (!title) return;
+
+    const priority = elements.taskPrioritySelect ? elements.taskPrioritySelect.value : 'Medium';
+    const category = elements.taskCategorySelect ? elements.taskCategorySelect.value : 'Work';
+    const dueDate = elements.taskDueDateInput && elements.taskDueDateInput.value ? elements.taskDueDateInput.value : getRelativeDateString(0);
+
+    const newTask = {
+      id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      title: title,
+      description: '',
+      completed: false,
+      priority: priority,
+      category: category,
+      time: '09:00 AM',
+      dueDate: dueDate,
+      createdAt: Date.now()
+    };
+
+    tasks.unshift(newTask);
+    saveTasksToStorage(tasks);
+    if (elements.taskForm) elements.taskForm.reset();
+
+    playAudio('add');
+    showToast('Task added! ✨', 'success');
+    announceLive(`Task added: ${title}`);
+
+    renderCalendarWeekRibbon();
+    render();
+  }
+
+  // --- Create Task Action (Modal / Bottom Sheet) ---
   function handleCreateTaskSubmit(e) {
     e.preventDefault();
     const title = elements.createTaskTitle.value.trim();
@@ -668,6 +740,7 @@
 
     playAudio('add');
     showToast('Task created successfully! ✨', 'success');
+    announceLive(`Task created: ${title}`);
 
     renderCalendarWeekRibbon();
     render();
@@ -723,6 +796,7 @@
       closeEditModal();
       playAudio('success');
       showToast('Task updated! 📝', 'success');
+      announceLive(`Task updated: ${title}`);
       renderCalendarWeekRibbon();
       render();
     }
@@ -738,11 +812,13 @@
 
     if (task.completed) {
       playAudio('success');
+      announceLive(`Task completed: ${task.title}`);
       if (task.priority === 'High' || tasks.every(t => t.completed)) {
         triggerConfetti();
       }
     } else {
       playAudio('click');
+      announceLive(`Task marked active: ${task.title}`);
     }
 
     renderCalendarWeekRibbon();
@@ -753,12 +829,14 @@
     const index = tasks.findIndex(t => t.id === id);
     if (index === -1) return;
 
+    const taskTitle = tasks[index].title;
     lastDeletedTask = { task: tasks[index], index: index };
     tasks.splice(index, 1);
     saveTasksToStorage(tasks);
 
     playAudio('delete');
     showUndoToast();
+    announceLive(`Task deleted: ${taskTitle}`);
 
     renderCalendarWeekRibbon();
     render();
@@ -1136,16 +1214,19 @@
         li.innerHTML = `
           <div class="card-top-row">
             <div class="card-tags-cluster">
-              <span class="tag-prio-pill ${task.priority}">${task.priority}</span>
+              <span class="tag-prio-pill ${task.priority}">${task.priority} Priority</span>
               <span class="tag-time-pill">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
                 <span>${task.time || (task.dueDate ? task.dueDate : 'Today')}</span>
               </span>
               <span class="tag-cat-pill">${task.category}</span>
             </div>
-            <button class="circular-check-btn" title="${task.completed ? 'Mark pending' : 'Mark done'}" aria-label="Toggle task">
-              ${task.completed ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
-            </button>
+            <label class="custom-checkbox-wrapper" for="cb-${task.id}">
+              <input type="checkbox" id="cb-${task.id}" class="task-checkbox" data-id="${task.id}" aria-label="Mark task '${escapeHtml(task.title)}' as ${task.completed ? 'incomplete' : 'completed'}" ${task.completed ? 'checked' : ''} />
+              <div class="circular-check-btn" aria-hidden="true">
+                ${task.completed ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+              </div>
+            </label>
           </div>
 
           <h4 class="task-main-title">${titleHtml}</h4>
@@ -1154,21 +1235,24 @@
           <div class="card-bottom-actions">
             <span class="card-status-label">${task.completed ? 'Completed' : 'In Progress'}</span>
             <div class="card-action-icons">
-              <button class="icon-btn-micro btn-edit" title="Edit task" aria-label="Edit task">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <button class="icon-btn-micro btn-edit edit-btn" data-action="edit" title="Edit task" aria-label="Edit task: ${escapeHtml(task.title)}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               </button>
-              <button class="icon-btn-micro btn-del" title="Delete task" aria-label="Delete task">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <button class="icon-btn-micro btn-del delete-btn" data-action="delete" title="Delete task" aria-label="Delete task: ${escapeHtml(task.title)}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
           </div>
         `;
 
-        // Card Checkbox toggle
-        li.querySelector('.circular-check-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleTaskCompletion(task.id);
-        });
+        // Native Checkbox change listener
+        const checkbox = li.querySelector('.task-checkbox');
+        if (checkbox) {
+          checkbox.addEventListener('change', (e) => {
+            e.stopPropagation();
+            toggleTaskCompletion(task.id);
+          });
+        }
 
         // Edit button
         li.querySelector('.btn-edit').addEventListener('click', (e) => {
@@ -1201,15 +1285,21 @@
     const lowPrio = tasks.filter(t => t.priority === 'Low').length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // Numerical stats
+    // Numerical stats & Test Runner Aliases
     if (elements.statTotal) elements.statTotal.textContent = total;
+    if (elements.totalTasks) elements.totalTasks.textContent = total;
     if (elements.statCompleted) elements.statCompleted.textContent = completed;
+    if (elements.completedTasks) elements.completedTasks.textContent = completed;
     if (elements.statPending) elements.statPending.textContent = pending;
+    if (elements.pendingTasks) elements.pendingTasks.textContent = pending;
     if (elements.statHigh) elements.statHigh.textContent = highPrio;
     if (elements.statPercentage) elements.statPercentage.textContent = `${percentage}%`;
 
     // Linear progress bar & quote
     if (elements.progressBarFill) elements.progressBarFill.style.width = `${percentage}%`;
+    const progressBarWrapper = document.getElementById('progressBarWrapper');
+    if (progressBarWrapper) progressBarWrapper.setAttribute('aria-valuenow', percentage);
+
     if (elements.motivationQuote) {
       if (total === 0) elements.motivationQuote.textContent = 'Add your first task to get started.';
       else if (percentage === 100) elements.motivationQuote.textContent = 'Superb! All tasks completed today! 🎉';

@@ -2,22 +2,32 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FocusList — Daily Task & Productivity Studio</title>
+  <meta name="theme-color" content="#0c0a17" />
+  <title>FocusList — Daily Task & Priority Engine</title>
   <meta name="description" content="Sleek, responsive daily task & productivity app with calendar week ribbon, day timeline, priority matrix, and local data persistence." />
+  <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%238b5cf6%22/><path d=%22M30 50 L44 64 L70 36%22 fill=%22none%22 stroke=%22white%22 stroke-width=%2210%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>" />
 </head>
 <body>
+  <!-- Accessibility Skip to Main Content Link -->
+  <a href="#main-content" class="skip-link sr-only focusable">Skip to main content</a>
+
+  <!-- Screen Reader Live Announcements -->
+  <div id="liveRegion" role="status" aria-live="polite" class="sr-only"></div>
+
   <!-- Confetti Canvas -->
   <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
 
   <div class="app-layout">
     <!-- Desktop Left Sidebar (Visible on Desktop / Large Tablets) -->
-    <aside class="desktop-sidebar" id="desktopSidebar">
+    <aside class="desktop-sidebar" id="desktopSidebar" role="complementary" aria-label="Sidebar Navigation">
       <div class="sidebar-brand">
         <div class="brand-avatar">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -243,7 +253,7 @@
       </header>
 
       <!-- Main Scrollable Content -->
-      <main class="dashboard-scrollable" id="mainScrollable">
+      <main class="dashboard-scrollable" id="main-content" role="main">
 
         <!-- ==============================================================
              VIEW 1: TASKS (HOME) VIEW
@@ -319,7 +329,7 @@
               <!-- Left: Donut Chart -->
               <div class="donut-chart-container">
                 <div class="donut-svg-wrapper">
-                  <svg class="donut-svg" width="115" height="115" viewBox="0 0 115 115">
+                  <svg class="donut-svg" width="115" height="115" viewBox="0 0 115 115" aria-hidden="true">
                     <circle class="donut-track" cx="57.5" cy="57.5" r="45"></circle>
                     <circle class="donut-arc arc-done" id="donutDoneSeg" cx="57.5" cy="57.5" r="45"></circle>
                     <circle class="donut-arc arc-prog" id="donutProgSeg" cx="57.5" cy="57.5" r="45"></circle>
@@ -327,7 +337,7 @@
                   </svg>
                   <div class="donut-center-badge">
                     <span class="center-badge-title">Tasks Done</span>
-                    <strong class="center-badge-num" id="statPercentage">0%</strong>
+                    <strong class="center-badge-num" id="statPercentage" data-testid="completion-percentage">0%</strong>
                   </div>
                 </div>
               </div>
@@ -337,28 +347,31 @@
                 <div class="legend-row">
                   <span class="legend-dot dot-rose"></span>
                   <span class="legend-name">Stuck / Urgent</span>
-                  <strong class="legend-count" id="statHigh">0</strong>
+                  <strong class="legend-count" id="statHigh" data-testid="high-tasks">0</strong>
                 </div>
                 <div class="legend-row">
                   <span class="legend-dot dot-amber"></span>
                   <span class="legend-name">In Progress</span>
-                  <strong class="legend-count" id="statPending">0</strong>
+                  <strong class="legend-count" id="statPending" data-testid="pending-tasks">0</strong>
+                  <span id="pendingTasks" class="sr-only">0</span>
                 </div>
                 <div class="legend-row">
                   <span class="legend-dot dot-emerald"></span>
                   <span class="legend-name">Completed Done</span>
-                  <strong class="legend-count" id="statCompleted">0</strong>
+                  <strong class="legend-count" id="statCompleted" data-testid="completed-tasks">0</strong>
+                  <span id="completedTasks" class="sr-only">0</span>
                 </div>
                 <div class="legend-row">
                   <span class="legend-dot dot-purple"></span>
                   <span class="legend-name">Total Pipeline</span>
-                  <strong class="legend-count" id="statTotal">0</strong>
+                  <strong class="legend-count" id="statTotal" data-testid="total-tasks">0</strong>
+                  <span id="totalTasks" class="sr-only">0</span>
                 </div>
               </div>
             </div>
 
             <!-- Linear Progress Strip -->
-            <div class="kpi-linear-bar">
+            <div class="kpi-linear-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBarWrapper">
               <div class="linear-track">
                 <div class="linear-fill" id="progressBarFill" style="width: 0%;"></div>
               </div>
@@ -366,25 +379,79 @@
             </div>
           </div>
 
+          <!-- Quick-Add Task Bar (Instant inline creation for Desktop, Mobile & Automated Tests) -->
+          <div class="quick-add-container" aria-label="Create a task">
+            <form id="taskForm" class="quick-add-form" autocomplete="off">
+              <div class="quick-add-main-row">
+                <div class="quick-add-input-wrap">
+                  <label for="taskTitleInput" class="sr-only">Task Title</label>
+                  <input
+                    type="text"
+                    id="taskTitleInput"
+                    name="taskTitle"
+                    class="quick-add-input"
+                    placeholder="Add a new task (e.g., Deliver presentation)... Press Enter"
+                    maxlength="140"
+                    required
+                    aria-required="true"
+                  />
+                  <input type="hidden" id="taskInput" />
+                </div>
+                <button type="submit" id="addTaskBtn" class="quick-add-submit-btn" aria-label="Add new task">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Add Task</span>
+                </button>
+              </div>
+              <div class="quick-add-options-row">
+                <div class="quick-option-item">
+                  <label for="taskPrioritySelect" class="quick-option-label">Priority:</label>
+                  <select id="taskPrioritySelect" class="quick-mini-select" aria-label="Task Priority">
+                    <option value="Medium">🟡 Medium Priority</option>
+                    <option value="High">🔴 High Priority</option>
+                    <option value="Low">🟢 Low Priority</option>
+                  </select>
+                </div>
+                <div class="quick-option-item">
+                  <label for="taskCategorySelect" class="quick-option-label">Category:</label>
+                  <select id="taskCategorySelect" class="quick-mini-select" aria-label="Task Category">
+                    <option value="Work">💼 Work Projects</option>
+                    <option value="Personal">🌱 Personal & Habits</option>
+                    <option value="Study">📚 Study & Learning</option>
+                    <option value="Urgent">⚡ Urgent Items</option>
+                    <option value="General">📝 General</option>
+                  </select>
+                </div>
+                <div class="quick-option-item">
+                  <label for="taskDueDateInput" class="quick-option-label">Due Date:</label>
+                  <input type="date" id="taskDueDateInput" class="quick-mini-date" aria-label="Task Due Date" />
+                </div>
+              </div>
+            </form>
+          </div>
+
           <!-- Status Filter Tabs & Sort Toolbar -->
           <div class="status-toolbar-row" aria-label="Task Status Filters">
             <div class="status-tabs-group" role="tablist">
-              <button class="status-btn active" data-filter="all" role="tab">
+              <button class="status-btn active" id="filterAll" data-filter="all" role="tab" aria-selected="true">
                 <span>All</span>
                 <span class="count-bubble" id="countAll">0</span>
               </button>
-              <button class="status-btn" data-filter="active" role="tab">
+              <button class="status-btn" id="filterActive" data-filter="active" role="tab" aria-selected="false">
                 <span>Active</span>
                 <span class="count-bubble" id="countActive">0</span>
               </button>
-              <button class="status-btn" data-filter="completed" role="tab">
+              <button class="status-btn" id="filterCompleted" data-filter="completed" role="tab" aria-selected="false">
                 <span>Done</span>
                 <span class="count-bubble" id="countCompleted">0</span>
               </button>
             </div>
 
             <div class="sort-selector-wrap">
-              <select id="sortBySelect" class="clean-sort-select">
+              <label for="sortBySelect" class="sr-only">Sort Tasks By</label>
+              <select id="sortBySelect" class="clean-sort-select" aria-label="Sort Tasks">
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
                 <option value="priority">Priority</option>
