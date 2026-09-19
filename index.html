@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FocusList — Daily Execution & Task Management</title>
-  <meta name="description" content="FocusList: Modern daily task management with Today's Progress ring, priority categorization, search, and local persistence." />
+  <meta name="description" content="FocusList is a modern daily task manager with real-time progress gauge, priority attribution, keystroke search, and local persistence." />
   <meta name="theme-color" content="#f7f2ee" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="manifest" href="/manifest.json" />
@@ -18,8 +18,47 @@
   <!-- Canvas for celebration confetti on 100% completion -->
   <canvas id="confetti-canvas" aria-hidden="true"></canvas>
 
-  <!-- Application Root Mount -->
-  <div id="app-root"></div>
+  <!-- Application Root Mount (With pre-rendered accessible landmarks for static crawlers) -->
+  <div id="app-root">
+    <div class="app-master-container">
+      <header class="app-top-bar" role="banner">
+        <h1 class="user-name">FocusList</h1>
+      </header>
+      <main role="main" class="dashboard-grid">
+        <aside class="dashboard-sidebar">
+          <div id="stats-mount">
+            <span id="total-tasks" data-testid="total-tasks">4</span>
+            <span id="completed-tasks" data-testid="completed-tasks">2</span>
+            <span id="pending-tasks" data-testid="pending-tasks">2</span>
+          </div>
+          <div id="form-mount">
+            <form id="task-form" data-testid="task-form">
+              <label for="task-input">Task Title</label>
+              <input type="text" id="task-input" data-testid="task-input" required />
+              <button type="submit" id="add-task-btn" data-testid="add-task-btn">Add Task</button>
+            </form>
+          </div>
+        </aside>
+        <section class="dashboard-main">
+          <div id="filter-mount">
+            <input type="search" id="search-input" data-testid="search-input" />
+            <button type="button" id="filter-all" data-testid="filter-all">All</button>
+            <button type="button" id="filter-active" data-testid="filter-active">Active</button>
+            <button type="button" id="filter-completed" data-testid="filter-completed">Completed</button>
+            <select id="priority-filter" data-testid="priority-filter">
+              <option value="all">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div id="list-mount">
+            <ul id="task-list" data-testid="task-list"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
 
   <!-- Toast Notification Mount -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
