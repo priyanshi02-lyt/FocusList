@@ -2,54 +2,107 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FocusList — Smart Daily Task & Priority Engine</title>
-  <meta name="description" content="A fast, beautiful, and intuitive frontend task management application with priority tracking, real-time filtering, statistics, and local persistence." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FocusList — Spatial Daily Task & Priority Engine</title>
+  <meta name="description" content="A breathtaking, responsive frontend task management web application with priority tracking, real-time filtering, statistics, and local persistence." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>" />
 </head>
 <body>
-  <!-- Ambient Background Glow Accents -->
-  <div class="ambient-glow glow-1" aria-hidden="true"></div>
-  <div class="ambient-glow glow-2" aria-hidden="true"></div>
+  <!-- Atmospheric Spatial Background -->
+  <div class="spatial-bg-wrapper" aria-hidden="true">
+    <div class="spatial-bg-image"></div>
+    <div class="spatial-bg-vignette"></div>
+    <div class="spatial-bg-particles">
+      <canvas id="ambientCanvas"></canvas>
+    </div>
+  </div>
 
   <!-- Confetti Canvas -->
   <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
 
-  <div class="app-wrapper">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="header-left">
-        <div class="brand-logo">
-          <div class="logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+  <!-- Side Navigation Dots (Inspired by the Video) -->
+  <nav class="spatial-side-nav" aria-label="Quick View Navigation">
+    <button class="nav-dot active" data-view="all" aria-label="View All Tasks" title="All Tasks">
+      <span class="dot-disc"></span>
+      <span class="dot-label">All Tasks</span>
+    </button>
+    <button class="nav-dot" data-view="active" aria-label="View Active Tasks" title="Active Focus">
+      <span class="dot-disc"></span>
+      <span class="dot-label">Active Focus</span>
+    </button>
+    <button class="nav-dot" data-view="priority" aria-label="View High Priority" title="High Priority">
+      <span class="dot-disc"></span>
+      <span class="dot-label">High Priority</span>
+    </button>
+    <button class="nav-dot" data-view="completed" aria-label="View Completed Tasks" title="Completed">
+      <span class="dot-disc"></span>
+      <span class="dot-label">Completed</span>
+    </button>
+  </nav>
+
+  <!-- Main Spatial App Container -->
+  <div class="app-spatial-container" id="spatialContainer">
+    <!-- Top HUD Navigation Bar -->
+    <header class="spatial-hud-top">
+      <div class="hud-left">
+        <div class="brand-crest">
+          <div class="crest-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
           </div>
-          <div>
-            <h1 class="brand-title">Focus<span class="highlight">List</span></h1>
-            <p class="brand-subtitle">Streamline your workflow with laser focus</p>
+          <div class="brand-text-block">
+            <h1 class="brand-title">FOCUS<span class="gold-text">LIST</span></h1>
+            <span class="brand-tagline">SPATIAL TASK ENGINE</span>
           </div>
         </div>
       </div>
 
-      <div class="header-right">
-        <div class="current-date-badge" id="currentDateBadge">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Center Golden Focus Badge (Matching the Video's Center Dial) -->
+      <div class="hud-center">
+        <div class="golden-focus-dial" id="goldenFocusDial" title="Active Focus Index">
+          <svg class="dial-ring-svg" width="46" height="46" viewBox="0 0 46 46">
+            <circle class="dial-ring-bg" cx="23" cy="23" r="20"></circle>
+            <circle class="dial-ring-fill" id="dialRingFill" cx="23" cy="23" r="20"></circle>
+          </svg>
+          <span class="dial-number" id="dialPendingCount">0</span>
+          <span class="dial-subtext">PENDING</span>
+        </div>
+      </div>
+
+      <!-- Right HUD Controls -->
+      <div class="hud-right">
+        <!-- Live Date Badge -->
+        <div class="hud-pill-badge" id="hudDateBadge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
-          <span id="headerDateText">Today</span>
+          <span id="hudDateText">Today</span>
         </div>
 
+        <!-- Ambient Sound Toggle -->
+        <button id="soundToggleBtn" class="hud-icon-btn" title="Toggle Sound Feedback" aria-label="Toggle Sound Effects">
+          <svg class="sound-on-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg class="sound-off-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
         <!-- Theme Toggle -->
-        <button id="themeToggleBtn" class="icon-btn theme-toggle" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
-          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="themeToggleBtn" class="hud-icon-btn" title="Toggle Atmosphere / Theme" aria-label="Toggle Theme">
+          <svg class="sun-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -60,94 +113,99 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="moon-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Productivity & Task Statistics Dashboard -->
-    <section class="stats-container" aria-label="Task Statistics">
-      <div class="stat-card total-card">
-        <div class="stat-icon-wrap bg-blue">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Productivity & Task Statistics (Glass Cards) -->
+    <section class="spatial-stats-grid" aria-label="Productivity Metrics">
+      <div class="glass-stat-card total-card">
+        <div class="card-glow-reflection"></div>
+        <div class="stat-icon-wrap icon-gold">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 11l3 3L22 4"></path>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
         </div>
-        <div class="stat-content">
-          <span class="stat-label">Total Tasks</span>
-          <h3 class="stat-value" id="statTotal">0</h3>
+        <div class="stat-body">
+          <span class="stat-label">Total Pipeline</span>
+          <h3 class="stat-number" id="statTotal">0</h3>
+          <span class="stat-hint">All Tracked Goals</span>
         </div>
-        <span class="stat-sparkle">All Items</span>
       </div>
 
-      <div class="stat-card pending-card">
-        <div class="stat-icon-wrap bg-amber">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="glass-stat-card pending-card">
+        <div class="card-glow-reflection"></div>
+        <div class="stat-icon-wrap icon-amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
         </div>
-        <div class="stat-content">
-          <span class="stat-label">Pending Tasks</span>
-          <h3 class="stat-value" id="statPending">0</h3>
+        <div class="stat-body">
+          <span class="stat-label">Pending In Progress</span>
+          <h3 class="stat-number text-amber" id="statPending">0</h3>
+          <span class="stat-hint">Active Focus</span>
         </div>
-        <span class="stat-sparkle">In Progress</span>
       </div>
 
-      <div class="stat-card completed-card">
-        <div class="stat-icon-wrap bg-green">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="glass-stat-card completed-card">
+        <div class="card-glow-reflection"></div>
+        <div class="stat-icon-wrap icon-emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
-        <div class="stat-content">
-          <span class="stat-label">Completed Tasks</span>
-          <h3 class="stat-value" id="statCompleted">0</h3>
+        <div class="stat-body">
+          <span class="stat-label">Completed Victories</span>
+          <h3 class="stat-number text-emerald" id="statCompleted">0</h3>
+          <span class="stat-hint">Delivered & Checked</span>
         </div>
-        <span class="stat-sparkle">Achieved</span>
       </div>
 
-      <!-- Completion Rate Card -->
-      <div class="stat-card progress-summary-card">
-        <div class="progress-info">
-          <span class="stat-label">Completion Rate</span>
-          <h3 class="stat-value percentage-val" id="statPercentage">0%</h3>
+      <div class="glass-stat-card rate-card">
+        <div class="card-glow-reflection"></div>
+        <div class="rate-card-content">
+          <div class="rate-header">
+            <span class="stat-label">Completion Velocity</span>
+            <span class="rate-value text-gold" id="statPercentage">0%</span>
+          </div>
+          <div class="spatial-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="spatial-progress-fill" id="progressBarFill" style="width: 0%;"></div>
+          </div>
+          <p class="spatial-quote" id="motivationQuote">Architect your day with serene focus.</p>
         </div>
-        <div class="progress-bar-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBarWrapper">
-          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
-        </div>
-        <p class="motivation-quote" id="motivationQuote">Ready to conquer your goals today!</p>
       </div>
     </section>
 
-    <!-- Priority Breakdown Quick Bar -->
-    <div class="priority-breakdown-bar" id="priorityBreakdownBar" aria-label="Priority Distribution">
-      <div class="priority-chip chip-high" title="High Priority Tasks">
-        <span class="dot-indicator"></span>
-        <span class="chip-text">High: <strong id="chipHighCount">0</strong></span>
-      </div>
-      <div class="priority-chip chip-medium" title="Medium Priority Tasks">
-        <span class="dot-indicator"></span>
-        <span class="chip-text">Medium: <strong id="chipMediumCount">0</strong></span>
-      </div>
-      <div class="priority-chip chip-low" title="Low Priority Tasks">
-        <span class="dot-indicator"></span>
-        <span class="chip-text">Low: <strong id="chipLowCount">0</strong></span>
-      </div>
+    <!-- Priority Distribution Quick Pills -->
+    <div class="priority-aura-bar" aria-label="Priority Overview">
+      <button class="aura-pill pill-ruby" data-filter-prio="High" title="Filter High Priority">
+        <span class="aura-dot"></span>
+        <span>High Priority: <strong id="chipHighCount">0</strong></span>
+      </button>
+      <button class="aura-pill pill-solar" data-filter-prio="Medium" title="Filter Medium Priority">
+        <span class="aura-dot"></span>
+        <span>Medium Priority: <strong id="chipMediumCount">0</strong></span>
+      </button>
+      <button class="aura-pill pill-jade" data-filter-prio="Low" title="Filter Low Priority">
+        <span class="aura-dot"></span>
+        <span>Low Priority: <strong id="chipLowCount">0</strong></span>
+      </button>
     </div>
 
-    <!-- Main Content Card -->
-    <main class="main-card">
+    <!-- Main Glassmorphic Workspace Tablet -->
+    <main class="spatial-glass-tablet" id="mainTablet">
       <!-- Task Creation Section -->
-      <section class="task-creation-section" aria-label="Create New Task">
-        <form id="taskForm" class="task-form" autocomplete="off">
-          <div class="input-main-row">
-            <div class="text-input-wrap">
-              <svg class="input-lead-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <section class="task-creation-panel" aria-label="Create New Task">
+        <form id="taskForm" class="spatial-form" autocomplete="off">
+          <div class="input-command-bar">
+            <div class="input-core-wrapper">
+              <svg class="input-gem-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -155,59 +213,59 @@
               <input
                 type="text"
                 id="taskTitleInput"
-                class="task-text-input"
-                placeholder="What needs to be done? Enter task title..."
+                class="spatial-text-input"
+                placeholder="What monumental task will you conquer next? (Enter task title...)"
                 maxlength="140"
                 required
               />
               <span class="char-counter" id="charCounter">0/140</span>
             </div>
-            <button type="submit" id="addTaskBtn" class="btn btn-primary add-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <button type="submit" id="addTaskBtn" class="spatial-submit-btn">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Add Task</span>
+              <span>Add Goal</span>
             </button>
           </div>
 
-          <!-- Priority Selector & Meta Controls -->
-          <div class="creation-options-row">
+          <!-- Priority Badges & Metadata Selectors -->
+          <div class="form-attributes-row">
             <div class="priority-selection-group">
-              <span class="option-label">Priority:</span>
-              <div class="priority-buttons" role="radiogroup" aria-label="Task Priority">
-                <label class="priority-btn high" title="High Priority - Urgent & Important">
+              <span class="attr-title">Priority Tier:</span>
+              <div class="priority-tier-buttons" role="radiogroup" aria-label="Task Priority">
+                <label class="prio-tier-btn high" title="High Priority - Urgent & Crucial">
                   <input type="radio" name="priority" value="High" />
-                  <span class="priority-btn-content">
-                    <span class="indicator-dot"></span>
-                    <span class="priority-name">High</span>
+                  <span class="prio-tier-face">
+                    <span class="gem-pulse ruby"></span>
+                    <span>High</span>
                   </span>
                 </label>
-                <label class="priority-btn medium active" title="Medium Priority - Standard">
+                <label class="prio-tier-btn medium active" title="Medium Priority - Standard Pace">
                   <input type="radio" name="priority" value="Medium" checked />
-                  <span class="priority-btn-content">
-                    <span class="indicator-dot"></span>
-                    <span class="priority-name">Medium</span>
+                  <span class="prio-tier-face">
+                    <span class="gem-pulse amber"></span>
+                    <span>Medium</span>
                   </span>
                 </label>
-                <label class="priority-btn low" title="Low Priority - Casual / Routine">
+                <label class="prio-tier-btn low" title="Low Priority - Flexible & Routine">
                   <input type="radio" name="priority" value="Low" />
-                  <span class="priority-btn-content">
-                    <span class="indicator-dot"></span>
-                    <span class="priority-name">Low</span>
+                  <span class="prio-tier-face">
+                    <span class="gem-pulse emerald"></span>
+                    <span>Low</span>
                   </span>
                 </label>
               </div>
             </div>
 
-            <!-- Optional Extras (Category & Due Date) -->
-            <div class="creation-extra-group">
-              <div class="select-wrapper">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Optional Category & Due Date -->
+            <div class="meta-dropdowns-group">
+              <div class="glass-select-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                   <line x1="7" y1="7" x2="7.01" y2="7"></line>
                 </svg>
-                <select id="taskCategorySelect" class="clean-select" aria-label="Task Category">
+                <select id="taskCategorySelect" class="glass-select" aria-label="Task Category">
                   <option value="General">General</option>
                   <option value="Work">Work</option>
                   <option value="Personal">Personal</option>
@@ -216,76 +274,73 @@
                 </select>
               </div>
 
-              <div class="date-wrapper">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <div class="glass-date-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <input type="date" id="taskDueDateInput" class="clean-date-input" aria-label="Due Date (Optional)" />
+                <input type="date" id="taskDueDateInput" class="glass-date-input" aria-label="Due Date (Optional)" />
               </div>
             </div>
           </div>
         </form>
       </section>
 
-      <!-- Search, Filter & Sort Toolbar -->
-      <section class="toolbar-section" aria-label="Task Search and Filters">
-        <!-- Search Input with Clear Button -->
-        <div class="search-box-wrap">
-          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Real-Time Search, Filter & Sort Toolbar -->
+      <section class="spatial-toolbar" aria-label="Search and Filter Controls">
+        <div class="search-bar-wrap">
+          <svg class="search-glass-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input
             type="search"
             id="searchInput"
-            class="search-input"
-            placeholder="Search tasks by title..."
+            class="spatial-search-input"
+            placeholder="Search tasks instantly by keyword..."
             aria-label="Search tasks"
           />
           <button id="clearSearchBtn" class="clear-search-btn" title="Clear Search" aria-label="Clear Search" style="display: none;">
             &times;
           </button>
-          <kbd class="shortcut-hint" title="Press / to search">/</kbd>
+          <kbd class="spatial-kbd" title="Press / to search">/</kbd>
         </div>
 
         <!-- Filter Controls Row -->
-        <div class="filters-row">
-          <!-- Status Filters (All, Active, Completed) -->
-          <div class="status-tabs" role="tablist" aria-label="Task Status Filters">
-            <button class="status-tab active" data-filter="all" role="tab" aria-selected="true">
-              <span>All</span>
-              <span class="tab-count" id="countAll">0</span>
+        <div class="spatial-filter-bar">
+          <!-- Status Tabs (All, Active, Completed) -->
+          <div class="glass-tabs" role="tablist" aria-label="Task Status Filters">
+            <button class="glass-tab active" data-filter="all" role="tab" aria-selected="true">
+              <span>All Tasks</span>
+              <span class="tab-badge" id="countAll">0</span>
             </button>
-            <button class="status-tab" data-filter="active" role="tab" aria-selected="false">
+            <button class="glass-tab" data-filter="active" role="tab" aria-selected="false">
               <span>Active</span>
-              <span class="tab-count" id="countActive">0</span>
+              <span class="tab-badge" id="countActive">0</span>
             </button>
-            <button class="status-tab" data-filter="completed" role="tab" aria-selected="false">
+            <button class="glass-tab" data-filter="completed" role="tab" aria-selected="false">
               <span>Completed</span>
-              <span class="tab-count" id="countCompleted">0</span>
+              <span class="tab-badge" id="countCompleted">0</span>
             </button>
           </div>
 
-          <!-- Secondary Filters: Priority Filter & Sort -->
-          <div class="filter-dropdowns">
-            <!-- Priority Filter -->
-            <div class="dropdown-control">
-              <label for="priorityFilterSelect" class="filter-label">Priority:</label>
-              <select id="priorityFilterSelect" class="clean-select" aria-label="Filter tasks by priority">
-                <option value="all">All Priorities</option>
+          <!-- Priority & Sort Dropdowns -->
+          <div class="spatial-selectors">
+            <div class="selector-field">
+              <label for="priorityFilterSelect" class="selector-label">Priority:</label>
+              <select id="priorityFilterSelect" class="glass-select" aria-label="Filter tasks by priority">
+                <option value="all">All Tiers</option>
                 <option value="High">🔴 High Priority</option>
                 <option value="Medium">🟡 Medium Priority</option>
                 <option value="Low">🟢 Low Priority</option>
               </select>
             </div>
 
-            <!-- Sort By -->
-            <div class="dropdown-control">
-              <label for="sortBySelect" class="filter-label">Sort:</label>
-              <select id="sortBySelect" class="clean-select" aria-label="Sort tasks">
+            <div class="selector-field">
+              <label for="sortBySelect" class="selector-label">Sort:</label>
+              <select id="sortBySelect" class="glass-select" aria-label="Sort tasks">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="priority">Priority (High → Low)</option>
@@ -297,17 +352,17 @@
         </div>
       </section>
 
-      <!-- Task List Container -->
-      <section class="task-list-section" aria-label="Tasks List">
-        <div class="list-meta-header">
-          <div class="list-heading-info">
-            <h2 class="section-title">Your Tasks</h2>
-            <span class="showing-count-text" id="showingCountText">Showing all tasks</span>
+      <!-- Task List Area -->
+      <section class="spatial-task-area" aria-label="Task Pipeline">
+        <div class="task-list-header">
+          <div class="header-info">
+            <h2 class="subheading-title">Active Pipeline</h2>
+            <span class="showing-indicator" id="showingCountText">Showing all tasks</span>
           </div>
 
-          <div class="list-quick-actions">
-            <button id="clearCompletedBtn" class="action-btn text-danger" title="Delete all completed tasks" disabled>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="header-tools">
+            <button id="clearCompletedBtn" class="spatial-btn-danger" title="Clear all completed tasks" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
@@ -316,54 +371,64 @@
           </div>
         </div>
 
-        <!-- Dynamic Tasks List -->
-        <ul id="taskList" class="task-list" role="list">
-          <!-- Populated by JavaScript -->
+        <!-- Task List Items -->
+        <ul id="taskList" class="spatial-tasks-ul" role="list">
+          <!-- Dynamically populated -->
         </ul>
 
-        <!-- Empty State Container -->
-        <div id="emptyState" class="empty-state" style="display: none;">
-          <div class="empty-icon-wrap">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="9" y1="15" x2="15" y2="15"></line>
+        <!-- Empty State Card -->
+        <div id="emptyState" class="spatial-empty-card" style="display: none;">
+          <div class="empty-halo">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
           </div>
-          <h3 class="empty-title" id="emptyTitle">No Tasks Found</h3>
-          <p class="empty-desc" id="emptyDesc">Looks like your task board is completely clear. Add your first goal above to get started!</p>
-          <button id="loadSampleTasksBtn" class="btn btn-secondary empty-action-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <h3 class="empty-headline" id="emptyTitle">Sanctuary of Clarity</h3>
+          <p class="empty-subheadline" id="emptyDesc">Your task pipeline is serene and clear. Add a new goal above to ignite your focus.</p>
+          <button id="loadSampleTasksBtn" class="spatial-pill-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
             </svg>
-            <span>Load Sample Tasks</span>
+            <span>Load Demo Tasks</span>
           </button>
         </div>
       </section>
     </main>
 
-    <!-- Footer with Extra Tools -->
-    <footer class="app-footer">
-      <div class="footer-left">
-        <span>Built with pure Frontend Vanilla JavaScript • High Performance</span>
-      </div>
-      <div class="footer-right">
-        <button id="exportJsonBtn" class="text-link-btn" title="Export tasks to JSON file">
+    <!-- Bottom HUD Bar (Inspired by Video's "About this Project" & Controls) -->
+    <footer class="spatial-hud-bottom">
+      <div class="hud-bottom-left">
+        <button id="aboutProjectBtn" class="hud-link-btn" title="About FocusList Engine">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>About This Project ⓘ</span>
+        </button>
+      </div>
+
+      <div class="hud-bottom-center">
+        <span class="shortcut-tip">Press <kbd>/</kbd> to Search • <kbd>Enter</kbd> to Add • <kbd>Esc</kbd> to Close</span>
+      </div>
+
+      <div class="hud-bottom-right">
+        <button id="exportJsonBtn" class="hud-link-btn" title="Export tasks to JSON">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          <span>Export Data</span>
+          <span>Export JSON</span>
         </button>
-        <span class="footer-divider">•</span>
-        <label for="importJsonInput" class="text-link-btn file-input-label" title="Import tasks from JSON file">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <span class="hud-sep">|</span>
+        <label for="importJsonInput" class="hud-link-btn" title="Import tasks from JSON">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
-          <span>Import Data</span>
+          <span>Import</span>
         </label>
         <input type="file" id="importJsonInput" accept=".json" style="display: none;" />
       </div>
@@ -371,67 +436,67 @@
   </div>
 
   <!-- Edit Task Modal Dialog -->
-  <div id="editModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <div class="modal-badge-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div id="editModal" class="spatial-modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="spatial-modal-window">
+      <div class="modal-top-bar">
+        <div class="modal-heading-wrap">
+          <div class="modal-icon-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
           </div>
-          <h3 id="modalTitle" class="modal-title">Edit Task</h3>
+          <h3 id="modalTitle" class="modal-title-text">Refine Task Goal</h3>
         </div>
-        <button id="closeModalBtn" class="icon-btn modal-close-btn" aria-label="Close edit modal">&times;</button>
+        <button id="closeModalBtn" class="modal-close-cross" aria-label="Close edit modal">&times;</button>
       </div>
 
-      <form id="editTaskForm" class="modal-form">
+      <form id="editTaskForm" class="modal-body-form">
         <input type="hidden" id="editTaskId" />
 
-        <div class="form-group">
-          <label for="editTaskTitle" class="form-label">Task Title <span class="required">*</span></label>
+        <div class="modal-field">
+          <label for="editTaskTitle" class="modal-label">Goal Title <span class="req">*</span></label>
           <input
             type="text"
             id="editTaskTitle"
-            class="clean-input modal-input"
+            class="modal-input"
             required
             maxlength="140"
-            placeholder="Enter task title..."
+            placeholder="Enter goal title..."
           />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Priority <span class="required">*</span></label>
-          <div class="modal-priority-group" role="radiogroup">
-            <label class="priority-btn high">
+        <div class="modal-field">
+          <label class="modal-label">Priority Tier <span class="req">*</span></label>
+          <div class="modal-prio-buttons" role="radiogroup">
+            <label class="prio-tier-btn high">
               <input type="radio" name="editPriority" value="High" />
-              <span class="priority-btn-content">
-                <span class="indicator-dot"></span>
+              <span class="prio-tier-face">
+                <span class="gem-pulse ruby"></span>
                 <span>High</span>
               </span>
             </label>
-            <label class="priority-btn medium">
+            <label class="prio-tier-btn medium">
               <input type="radio" name="editPriority" value="Medium" />
-              <span class="priority-btn-content">
-                <span class="indicator-dot"></span>
+              <span class="prio-tier-face">
+                <span class="gem-pulse amber"></span>
                 <span>Medium</span>
               </span>
             </label>
-            <label class="priority-btn low">
+            <label class="prio-tier-btn low">
               <input type="radio" name="editPriority" value="Low" />
-              <span class="priority-btn-content">
-                <span class="indicator-dot"></span>
+              <span class="prio-tier-face">
+                <span class="gem-pulse emerald"></span>
                 <span>Low</span>
               </span>
             </label>
           </div>
         </div>
 
-        <div class="form-row-2col">
-          <div class="form-group">
-            <label for="editTaskCategory" class="form-label">Category</label>
-            <select id="editTaskCategory" class="clean-select modal-select">
+        <div class="modal-row-split">
+          <div class="modal-field">
+            <label for="editTaskCategory" class="modal-label">Category</label>
+            <select id="editTaskCategory" class="modal-select">
               <option value="General">General</option>
               <option value="Work">Work</option>
               <option value="Personal">Personal</option>
@@ -440,24 +505,56 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="editTaskDueDate" class="form-label">Due Date</label>
-            <input type="date" id="editTaskDueDate" class="clean-date-input modal-input" />
+          <div class="modal-field">
+            <label for="editTaskDueDate" class="modal-label">Due Date</label>
+            <input type="date" id="editTaskDueDate" class="modal-input date-input" />
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+        <div class="modal-footer-btns">
+          <button type="button" id="cancelEditBtn" class="spatial-btn-cancel">Cancel</button>
+          <button type="submit" class="spatial-btn-confirm">Save Refinements</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Toast Container -->
-  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <!-- About Project Modal Dialog -->
+  <div id="aboutModal" class="spatial-modal-backdrop" aria-hidden="true" role="dialog">
+    <div class="spatial-modal-window about-window">
+      <div class="modal-top-bar">
+        <h3 class="modal-title-text">FocusList Spatial Engine</h3>
+        <button id="closeAboutModalBtn" class="modal-close-cross">&times;</button>
+      </div>
+      <div class="about-modal-content">
+        <p class="about-lead">Inspired by next-generation spatial computing and the luxury architectural aesthetic of Getty & Persepolis sanctuaries.</p>
+        <div class="about-grid">
+          <div class="about-feat">
+            <strong>🏛️ Spatial World</strong>
+            <span>Atmospheric architectural sanctuary with real-time floating light particles and mouse parallax tilt.</span>
+          </div>
+          <div class="about-feat">
+            <strong>🎯 Laser Focus</strong>
+            <span>Multi-tier priority attribution (Ruby, Solar Amber, Jade) with instant search highlighting.</span>
+          </div>
+          <div class="about-feat">
+            <strong>🎵 Sensory Feedback</strong>
+            <span>Interactive Web Audio API harmonic chimes, click feedback, and celebration confetti.</span>
+          </div>
+          <div class="about-feat">
+            <strong>⚡ Pure Frontend</strong>
+            <span>Zero backend dependencies. 100% LocalStorage persistence, instant execution, and full mobile optimization.</span>
+          </div>
+        </div>
+        <button id="dismissAboutBtn" class="spatial-btn-confirm full-width">Enter Sanctuary</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Scripts -->
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="spatial-toast-dock" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Application Logic -->
   <script src="app.js"></script>
 </body>
 </html>
