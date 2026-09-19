@@ -1,8 +1,7 @@
 {
   "name": "focuslist",
-  "version": "1.0.0",
-  "private": true,
-  "description": "High-performance daily task and priority engine with exact iOS studio aesthetic matching reference design, multi-criteria filtering, and local persistence.",
+  "version": "2.1.0",
+  "description": "FocusList: Modern daily task management with Today's Progress ring, priority categorization, search, and local persistence.",
   "type": "module",
   "homepage": "https://focuslist-bay.vercel.app",
   "repository": {
@@ -16,7 +15,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "node tests/run-tests.js",
+    "test:all": "node tests/run-tests.js && vitest run",
+    "test:vitest": "vitest run",
+    "lint": "eslint src/ --ext .js"
   },
   "keywords": [
     "todo",
@@ -25,12 +27,16 @@
     "frontend",
     "vanilla-js",
     "vitest",
-    "ios-design"
+    "ios-design",
+    "frontend-arena",
+    "hackathon"
   ],
   "author": "Priyanshi Srivastava (https://github.com/priyanshi02-lyt)",
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^9.0.0",
     "jsdom": "^25.0.1",
+    "prettier": "^3.2.5",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
   }
